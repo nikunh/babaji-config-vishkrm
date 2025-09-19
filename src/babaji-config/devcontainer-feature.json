@@ -1,1 +1,7 @@
-{"id": "babaji-config","version": "0.0.1","name": "Central Configuration Management TUI","description": "Central configuration management TUI for DevContainer features with health checks and system monitoring."}
+{
+    "name": "Babaji Configuration Utility",
+    "id": "babaji-config",
+    "version": "1.0.0",
+    "description": "Comprehensive configuration utility for Babaji Shellinator with NAS connectivity, verification tools, and more.",
+    "postCreateCommand": "/usr/local/lib/babaji-config/post-create.sh"
+}
