@@ -145,7 +145,12 @@ run_full_verification() {
     fi
     ((total_checks++))
     
-    # Go
+    # Go - Load user environment fragments first for proper detection
+    # Source Go environment fragment if it exists
+    if [ -f "/home/babaji/.ohmyzsh_source_load_scripts/.go-env.zshrc" ]; then
+        source "/home/babaji/.ohmyzsh_source_load_scripts/.go-env.zshrc" 2>/dev/null || true
+    fi
+
     if command -v go &>/dev/null; then
         style_success "✅ Go: $(go version | cut -d' ' -f3)"
         # Test Go PATH
@@ -167,14 +172,7 @@ run_full_verification() {
     fi
     ((total_checks++))
     
-    if command -v conda &>/dev/null; then
-        local conda_version=$(conda --version 2>/dev/null | cut -d' ' -f2)
-        style_success "✅ Conda: $conda_version"
-        ((passed_checks++))
-    else
-        style_error "❌ Conda: Not found"
-    fi
-    ((total_checks++))
+    # Note: Conda check removed - conda is temporarily disabled per devcontainer.json
     
     # Container and Cloud Tools
     echo -e "\n${BLUE}🐳 Container & Cloud Tools${NC}"
@@ -274,7 +272,7 @@ run_full_verification() {
     echo -e "\n${BLUE}✨ Modern CLI Tools${NC}"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     
-    local modern_tools=("gum" "aider" "nu" "browsh" "cloudflared")
+    local modern_tools=("gum" "aider" "nu" "cloudflared")
     for tool in "${modern_tools[@]}"; do
         if command -v "$tool" &>/dev/null; then
             local version=""
@@ -282,7 +280,6 @@ run_full_verification() {
                 "gum") version=$(gum --version | cut -d' ' -f3) ;;
                 "aider") version=$(aider --version | cut -d' ' -f2) ;;
                 "nu") version=$(nu --version | head -1) ;;
-                "browsh") version=$(browsh --version | cut -d' ' -f2) ;;
                 "cloudflared") version=$(cloudflared --version | cut -d' ' -f3) ;;
                 *) version="installed" ;;
             esac
@@ -314,14 +311,13 @@ run_full_verification() {
     ((total_checks++))
     
     # Editors
-    local editors=("vim" "nvim" "nano" "code-server")
+    local editors=("vim" "nvim" "code-server")
     for editor in "${editors[@]}"; do
         if command -v "$editor" &>/dev/null; then
             local version=""
             case "$editor" in
                 "vim") version=$(vim --version | head -1 | cut -d' ' -f5) ;;
                 "nvim") version=$(nvim --version | head -1 | cut -d' ' -f2) ;;
-                "nano") version=$(nano --version | head -1 | cut -d' ' -f4) ;;
                 "code-server") version=$(code-server --version | head -1) ;;
                 *) version="installed" ;;
             esac
