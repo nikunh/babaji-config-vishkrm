@@ -216,3 +216,4 @@ echo "🔒 Security Model:"
 echo "   - System tools in /usr/local (immutable, tamper-resistant)"
 echo "   - User tools in ~/.local (ephemeral, writable)"
 echo "   - Clear separation of concerns"
+# Auto-trigger build Tue Sep 23 20:02:57 BST 2025
