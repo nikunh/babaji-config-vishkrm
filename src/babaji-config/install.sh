@@ -5,6 +5,7 @@ set -e
 # Installs system tools to /usr/local (immutable) and preserves $HOME/.local for user tools
 
 echo "Installing Babaji Configuration Utility (System Installation)..."
+# Token fix test - trigger automation Mon Sep 23 22:14:00 BST 2025
 
 # System installation directories (immutable)
 SYSTEM_INSTALL_DIR="/usr/local/lib/babaji-config"

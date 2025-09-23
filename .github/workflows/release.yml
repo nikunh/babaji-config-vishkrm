@@ -136,4 +136,4 @@ jobs:
           echo "✅ Shellinator notification sent: babaji-config-vishkrm/babaji-config → ${{ steps.version.outputs.new_version }}"
           echo "The devcontainer.json will be updated within 10 minutes, or run './scripts/update-versions.sh force-now' for immediate update"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
