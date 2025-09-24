@@ -15,7 +15,22 @@ PROMPT_RESET="%f"
 # Check if cache is valid (not older than CACHE_DURATION)
 is_cache_valid() {
     if [[ -f "$CACHE_FILE" ]]; then
-        local cache_time=$(stat -f %m "$CACHE_FILE" 2>/dev/null || stat -c %Y "$CACHE_FILE" 2>/dev/null)
+        # Use stat to get modification time, handling both macOS and Linux
+        local cache_time
+        if command -v stat >/dev/null 2>&1; then
+            # Try Linux format first (more common in containers)
+            cache_time=$(stat -c %Y "$CACHE_FILE" 2>/dev/null)
+            # If that fails, try macOS format
+            if [[ -z "$cache_time" ]]; then
+                cache_time=$(stat -f %m "$CACHE_FILE" 2>/dev/null)
+            fi
+        fi
+
+        # If stat failed or returned empty, assume cache is invalid
+        if [[ -z "$cache_time" ]]; then
+            return 1
+        fi
+
         local current_time=$(date +%s)
         local cache_age=$((current_time - cache_time))
 
@@ -32,16 +47,17 @@ get_enabled_features() {
         return 1
     fi
 
-    # Parse features from devcontainer.json and extract name:version pairs
-    jq -r '.features | to_entries[] | select(.key | startswith("ghcr.io/nikunh/") and endswith("-vishkrm/")) | "\(.key)|\(.value)"' "$DEVCONTAINER_JSON" 2>/dev/null | while IFS='|' read -r feature_key feature_value; do
-        # Extract feature name and current version from the key
-        # Example: ghcr.io/nikunh/ai-tools-vishkrm/ai-tools:0.0.10
+    # Parse features from devcontainer.json
+    # Format: "ghcr.io/nikunh/feature-vishkrm/feature:version": {}
+    jq -r '.features | to_entries[] | select(.key | contains("-vishkrm/")) | .key' "$DEVCONTAINER_JSON" 2>/dev/null | while read -r feature_key; do
+        # Extract feature info from the key
+        # Example: ghcr.io/nikunh/ai-tools-vishkrm/ai-tools:0.0.13
         if [[ $feature_key =~ ghcr\.io/nikunh/([^/]+)/([^:]+):([0-9.]+) ]]; then
             local repo_name="${BASH_REMATCH[1]}"
             local feature_name="${BASH_REMATCH[2]}"
             local current_version="${BASH_REMATCH[3]}"
 
-            echo "${repo_name}:${feature_name}:${current_version}"
+            echo "${repo_name}|${feature_name}|${current_version}"
         fi
     done
 }
@@ -52,8 +68,9 @@ get_latest_version() {
     local feature_name="$2"
 
     # Query GitHub Container Registry API for latest version
-    local package_name="${repo_name}/${feature_name}"
-    local api_url="https://api.github.com/orgs/nikunh/packages/container/${package_name/\//%2F}/versions"
+    # Use users API instead of orgs for personal repos
+    local package_name="${repo_name}%2F${feature_name}"
+    local api_url="https://api.github.com/users/nikunh/packages/container/${package_name}/versions"
 
     # Get the latest version tag (assuming semantic versioning)
     curl -s -H "Accept: application/vnd.github.v3+json" "$api_url" 2>/dev/null | \
@@ -67,7 +84,7 @@ get_latest_version() {
 update_cache() {
     local updates=()
 
-    while IFS=':' read -r repo_name feature_name current_version; do
+    while IFS='|' read -r repo_name feature_name current_version; do
         if [[ -n "$repo_name" && -n "$feature_name" && -n "$current_version" ]]; then
             local latest_version=$(get_latest_version "$repo_name" "$feature_name")
 
