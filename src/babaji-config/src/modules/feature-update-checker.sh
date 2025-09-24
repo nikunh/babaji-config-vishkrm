@@ -5,6 +5,8 @@
 CACHE_FILE="/tmp/feature-updates-cache.json"
 CACHE_DURATION=3600  # 1 hour in seconds
 DEVCONTAINER_JSON="/workspaces/shellinator/.devcontainer/devcontainer.json"
+GITHUB_DEVCONTAINER_URL="https://raw.githubusercontent.com/nikunh/shellinator/main/.devcontainer/devcontainer.json"
+GITHUB_DEVCONTAINER_CACHE="/tmp/github-devcontainer.json"
 
 # Colors for prompt display
 PROMPT_BLUE="%F{blue}"
@@ -43,13 +45,15 @@ is_cache_valid() {
 
 # Extract enabled features from devcontainer.json
 get_enabled_features() {
-    if [[ ! -f "$DEVCONTAINER_JSON" ]]; then
+    local devcontainer_file="${1:-$DEVCONTAINER_JSON}"
+
+    if [[ ! -f "$devcontainer_file" ]]; then
         return 1
     fi
 
     # Parse features from devcontainer.json
     # Format: "ghcr.io/nikunh/feature-vishkrm/feature:version": {}
-    jq -r '.features | to_entries[] | select(.key | contains("-vishkrm/")) | .key' "$DEVCONTAINER_JSON" 2>/dev/null | while read -r feature_key; do
+    jq -r '.features | to_entries[] | select(.key | contains("-vishkrm/")) | .key' "$devcontainer_file" 2>/dev/null | while read -r feature_key; do
         # Extract feature info from the key
         # Example: ghcr.io/nikunh/ai-tools-vishkrm/ai-tools:0.0.13
         if [[ $feature_key =~ ghcr\.io/nikunh/([^/]+)/([^:]+):([0-9.]+) ]]; then
@@ -60,6 +64,15 @@ get_enabled_features() {
             echo "${repo_name}|${feature_name}|${current_version}"
         fi
     done
+}
+
+# Fetch latest devcontainer.json from GitHub
+fetch_github_devcontainer() {
+    if curl -s -f "$GITHUB_DEVCONTAINER_URL" > "$GITHUB_DEVCONTAINER_CACHE" 2>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 # Get latest version for a specific feature from GitHub Container Registry
@@ -82,20 +95,45 @@ get_latest_version() {
 
 # Check for updates and generate cache
 update_cache() {
+    # Fetch latest devcontainer.json from GitHub
+    if ! fetch_github_devcontainer; then
+        echo "Warning: Could not fetch latest devcontainer.json from GitHub" >&2
+        echo '[]' > "$CACHE_FILE"
+        return 1
+    fi
+
     local updates=()
 
+    # Create associative arrays for versions
+    declare -A current_versions
+    declare -A github_versions
+
+    # Get current container versions
     while IFS='|' read -r repo_name feature_name current_version; do
         if [[ -n "$repo_name" && -n "$feature_name" && -n "$current_version" ]]; then
-            local latest_version=$(get_latest_version "$repo_name" "$feature_name")
+            current_versions["$feature_name"]="$current_version"
+        fi
+    done < <(get_enabled_features "$DEVCONTAINER_JSON")
 
-            if [[ -n "$latest_version" && "$latest_version" != "$current_version" ]]; then
-                # Compare versions using sort -V
-                if [[ "$(printf '%s\n%s' "$current_version" "$latest_version" | sort -V | tail -1)" != "$current_version" ]]; then
-                    updates+=("{\"feature\":\"$feature_name\",\"current\":\"$current_version\",\"latest\":\"$latest_version\"}")
-                fi
+    # Get GitHub's latest versions
+    while IFS='|' read -r repo_name feature_name github_version; do
+        if [[ -n "$repo_name" && -n "$feature_name" && -n "$github_version" ]]; then
+            github_versions["$feature_name"]="$github_version"
+        fi
+    done < <(get_enabled_features "$GITHUB_DEVCONTAINER_CACHE")
+
+    # Compare versions
+    for feature_name in "${!current_versions[@]}"; do
+        local current_version="${current_versions[$feature_name]}"
+        local github_version="${github_versions[$feature_name]}"
+
+        if [[ -n "$github_version" && "$github_version" != "$current_version" ]]; then
+            # Compare versions using sort -V
+            if [[ "$(printf '%s\n%s' "$current_version" "$github_version" | sort -V | tail -1)" != "$current_version" ]]; then
+                updates+=("{\"feature\":\"$feature_name\",\"current\":\"$current_version\",\"latest\":\"$github_version\"}")
             fi
         fi
-    done < <(get_enabled_features)
+    done
 
     # Create JSON cache file
     if [[ ${#updates[@]} -gt 0 ]]; then
