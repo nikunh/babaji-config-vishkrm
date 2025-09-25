@@ -18,11 +18,9 @@ main_menu() {
         
         local choice=$(choose_option "Select configuration area:" \
             "📦 DevContainer Features" \
+            "🎭 Branch Personality Info" \
             "📡 NAS Configuration" \
             "🔐 SSH Service Management" \
-            "💓 Heartbeat Management" \
-            "🎭 Personality Management" \
-            "🔵🟢 Blue-Green Deployment" \
             "🔍 System Verification" \
             "⚙️  Environment Settings" \
             "📊 System Information" \
@@ -48,22 +46,10 @@ main_menu() {
                     ssh_menu
                 fi
                 ;;
-            "💓 Heartbeat Management")
-                # Load heartbeat module on-demand
-                if load_module "heartbeat"; then
-                    heartbeat_menu
-                fi
-                ;;
-            "🎭 Personality Management")
-                # Load personality module on-demand
+            "🎭 Branch Personality Info")
+                # Load personality module on-demand (updated for branch-based system)
                 if load_module "personality"; then
                     personality_menu
-                fi
-                ;;
-            "🔵🟢 Blue-Green Deployment")
-                # Load blue-green module on-demand
-                if load_module "bluegreen"; then
-                    bluegreen_menu
                 fi
                 ;;
             "🔍 System Verification")
