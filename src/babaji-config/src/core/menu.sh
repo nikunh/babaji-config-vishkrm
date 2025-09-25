@@ -17,6 +17,7 @@ main_menu() {
         main_header
         
         local choice=$(choose_option "Select configuration area:" \
+            "📦 DevContainer Features" \
             "📡 NAS Configuration" \
             "🔐 SSH Service Management" \
             "💓 Heartbeat Management" \
@@ -29,6 +30,12 @@ main_menu() {
             "🚪 Exit")
         
         case "$choice" in
+            "📦 DevContainer Features")
+                # Load features module on-demand
+                if load_module "features"; then
+                    features_menu
+                fi
+                ;;
             "📡 NAS Configuration")
                 # Load NAS module on-demand
                 if load_module "nas"; then
