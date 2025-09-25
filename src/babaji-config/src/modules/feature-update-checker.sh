@@ -5,7 +5,7 @@
 CACHE_FILE="/tmp/feature-updates-cache.json"
 CACHE_DURATION=3600  # 1 hour in seconds
 DEVCONTAINER_JSON="/workspaces/shellinator/.devcontainer/devcontainer.json"
-GITHUB_DEVCONTAINER_URL="https://raw.githubusercontent.com/nikunh/shellinator/main/.devcontainer/devcontainer.json"
+GITHUB_DEVCONTAINER_URL="https://raw.githubusercontent.com/nikunh/shellinator/master/.devcontainer/devcontainer.json"
 GITHUB_DEVCONTAINER_CACHE="/tmp/github-devcontainer.json"
 
 # Colors for prompt display
