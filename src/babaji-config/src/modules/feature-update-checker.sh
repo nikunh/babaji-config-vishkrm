@@ -163,12 +163,17 @@ get_update_prompt() {
             fi
         done < <(echo "$cache_content" | jq -c '.[]' 2>/dev/null)
 
-        # Build the prompt string - only show if updates are available
+        # Build the prompt string
         if [[ ${#update_parts[@]} -gt 0 ]]; then
             local updates_string=$(IFS=', '; echo "${update_parts[*]}")
             echo "${PROMPT_YELLOW}[${updates_string}]${PROMPT_RESET}"
+        else
+            # Show placeholder when no updates available
+            echo "${PROMPT_GREEN}[✓ up-to-date]${PROMPT_RESET}"
         fi
-        # If no updates available, return empty string (nothing displayed)
+    else
+        # Show placeholder when cache doesn't exist yet
+        echo "${PROMPT_BLUE}[checking...]${PROMPT_RESET}"
     fi
 }
 
@@ -205,11 +210,27 @@ check_feature_updates() {
                 echo "$cache_content" | jq -r '.[] | "  \(.feature): v\(.latest) update available (current: v\(.current))"' 2>/dev/null
             fi
             ;;
+        "list")
+            # List all currently installed features
+            echo "📦 Currently installed features:"
+            echo "────────────────────────────────"
+            if [[ -f "$DEVCONTAINER_JSON" ]]; then
+                while IFS='|' read -r repo_name feature_name current_version; do
+                    if [[ -n "$repo_name" && -n "$feature_name" && -n "$current_version" ]]; then
+                        printf "  %-30s v%s\n" "$feature_name" "$current_version"
+                    fi
+                done < <(get_enabled_features "$DEVCONTAINER_JSON") | sort
+            else
+                echo "  ❌ Could not find devcontainer.json"
+                echo "  Looking for: $DEVCONTAINER_JSON"
+            fi
+            ;;
         *)
-            echo "Usage: check_feature_updates [prompt|force|status]"
+            echo "Usage: check_feature_updates [prompt|force|status|list]"
             echo "  prompt - Quick check for prompt display (default)"
             echo "  force  - Force cache update and show prompt"
             echo "  status - Show detailed update status"
+            echo "  list   - List all currently installed features"
             ;;
     esac
 }
