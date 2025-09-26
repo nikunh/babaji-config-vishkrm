@@ -223,7 +223,10 @@ run_full_verification() {
     
     # Terraform
     if command -v terraform &>/dev/null; then
-        local tf_version=$(terraform --version | head -1 | cut -d' ' -f2)
+        local tf_version="installed"
+        if terraform --version >/dev/null 2>&1; then
+            tf_version=$(terraform --version | awk 'NR==1 {print $2; exit}')
+        fi
         style_success "✅ Terraform: $tf_version"
         ((passed_checks++))
     else
@@ -259,7 +262,24 @@ run_full_verification() {
     local json_tools=("jq" "yq" "fx")
     for tool in "${json_tools[@]}"; do
         if command -v "$tool" &>/dev/null; then
-            local version=$(timeout 3 $tool --version 2>/dev/null | head -1 2>/dev/null || echo "installed")
+            # Safer version checking - avoid complex pipes with timeout
+            local version="installed"
+            case "$tool" in
+                "jq")
+                    version=$(jq --version 2>/dev/null || echo "installed")
+                    ;;
+                "yq")
+                    # Use safer approach - get version without pipe to head
+                    if yq --version >/dev/null 2>&1; then
+                        version=$(yq --version 2>/dev/null | awk 'NR==1 {print; exit}')
+                    else
+                        version="installed"
+                    fi
+                    ;;
+                "fx")
+                    version=$(fx --version 2>/dev/null || echo "installed")
+                    ;;
+            esac
             style_success "✅ $tool: $version"
             ((passed_checks++))
         else
@@ -501,7 +521,11 @@ check_dev_tools() {
     
     for tool in "${tools[@]}"; do
         if command -v "$tool" &>/dev/null; then
-            local version=$(${tool} --version 2>/dev/null | head -n1 || echo "installed")
+            # Use safer version detection without head pipe
+            local version="installed"
+            if ${tool} --version >/dev/null 2>&1; then
+                version=$(${tool} --version 2>/dev/null | awk 'NR==1 {print; exit}')
+            fi
             style_success "✅ $tool: $version"
         else
             style_error "❌ $tool: Not found"
