@@ -10,6 +10,7 @@ nas_config_menu() {
 
         local choice=$(choose_option "Select NAS option:" \
             "🔗 Connect to NAS" \
+            "🚀 Quick Mount (Standard Locations)" \
             "📋 Show Current Mounts" \
             "🔓 Unmount NAS Share" \
             "ℹ️  NAS Connection Help" \
@@ -18,6 +19,9 @@ nas_config_menu() {
         case "$choice" in
             "🔗 Connect to NAS")
                 connect_to_nas
+                ;;
+            "🚀 Quick Mount (Standard Locations)")
+                quick_mount_nas
                 ;;
             "📋 Show Current Mounts")
                 show_current_mounts
@@ -44,6 +48,27 @@ connect_to_nas() {
         style_info "Launching NAS connector..."
         echo ""
         connect-nas
+    else
+        style_error "❌ connect-nas command not found"
+        echo ""
+        style_info "The NAS connector feature may not be installed."
+        echo "Please ensure the nas-connector feature is included in your devcontainer.json"
+    fi
+
+    echo ""
+    wait_for_user
+}
+
+# Quick Mount using nas-connector's standard locations feature
+quick_mount_nas() {
+    style_subheader "🚀 Quick Mount" "Mount standard NAS locations" "#00ff00"
+
+    echo ""
+    if command -v connect-nas &>/dev/null; then
+        style_info "Launching Quick Mount utility..."
+        echo ""
+        # Call connect-nas with environment variable to trigger quick mount mode
+        QUICK_MOUNT=true connect-nas
     else
         style_error "❌ connect-nas command not found"
         echo ""
