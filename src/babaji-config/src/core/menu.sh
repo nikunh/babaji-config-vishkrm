@@ -18,6 +18,7 @@ main_menu() {
         
         local choice=$(choose_option "Select configuration area:" \
             "📦 DevContainer Features" \
+            "📚 Dotfiles Help" \
             "🎭 Branch Personality Info" \
             "📡 NAS Configuration" \
             "🔐 SSH Service Management" \
@@ -32,6 +33,12 @@ main_menu() {
                 # Load features module on-demand
                 if load_module "features"; then
                     features_menu
+                fi
+                ;;
+            "📚 Dotfiles Help")
+                # Load dotfiles module on-demand
+                if load_module "dotfiles"; then
+                    dotfiles_help_menu
                 fi
                 ;;
             "📡 NAS Configuration")

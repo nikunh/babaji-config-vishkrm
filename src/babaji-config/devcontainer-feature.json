@@ -1,7 +1,7 @@
 {
   "name": "Babaji Configuration Utility",
   "id": "babaji-config",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Comprehensive configuration utility for Babaji Shellinator with NAS connectivity, verification tools, and more.",
   "postCreateCommand": "/usr/local/lib/babaji-config/post-create.sh",
   "installsAfter": [
