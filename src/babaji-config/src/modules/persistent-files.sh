@@ -61,7 +61,14 @@ run_persistent_files_setup() {
     style_subheader "▶️  Running Persistent Files Setup" "" "#4a90e2"
     echo ""
 
-    # Check if the function exists (now we're in zsh, so this works!)
+    # Source the actual persistent files script that contains the setup function
+    local PERSISTENT_FILES_SCRIPT="$HOME/.ohmyzsh_source_load_scripts/.persistent-files.zshrc"
+
+    if [ -f "$PERSISTENT_FILES_SCRIPT" ]; then
+        source "$PERSISTENT_FILES_SCRIPT"
+    fi
+
+    # Check if the function exists and run it
     if type persistent_files_setup &>/dev/null; then
         persistent_files_setup
     else
