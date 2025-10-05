@@ -19,6 +19,7 @@ main_menu() {
         local choice=$(choose_option "Select configuration area:" \
             "📦 DevContainer Features" \
             "📚 Dotfiles Help" \
+            "🔗 Persistent Files Setup" \
             "🎭 Branch Personality Info" \
             "📡 NAS Configuration" \
             "🔐 SSH Service Management" \
@@ -39,6 +40,12 @@ main_menu() {
                 # Load dotfiles module on-demand
                 if load_module "dotfiles"; then
                     dotfiles_help_menu
+                fi
+                ;;
+            "🔗 Persistent Files Setup")
+                # Load persistent files module on-demand
+                if load_module "persistent-files"; then
+                    persistent_files_menu
                 fi
                 ;;
             "📡 NAS Configuration")
