@@ -61,16 +61,19 @@ run_persistent_files_setup() {
     style_subheader "▶️  Running Persistent Files Setup" "" "#4a90e2"
     echo ""
 
-    # Check if the shell function exists
-    if type persistent_files_setup &>/dev/null; then
-        # Run the setup
-        persistent_files_setup
-    else
-        style_error "❌ persistent_files_setup function not found"
-        echo ""
-        echo "The function should be loaded from .persistent-files.zshrc"
-        echo "Try reloading your shell: exec zsh"
-    fi
+    # Run the setup in a zsh subshell (persistent_files_setup is a zsh function)
+    zsh -c '
+        source ~/.zshrc
+        if type persistent_files_setup &>/dev/null; then
+            persistent_files_setup
+        else
+            echo "❌ persistent_files_setup function not found"
+            echo ""
+            echo "The function should be loaded from .persistent-files.zshrc"
+            echo "Try reloading your shell: exec zsh"
+            exit 1
+        fi
+    '
 
     echo ""
     wait_for_user
