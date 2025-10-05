@@ -5,7 +5,11 @@
 CACHE_FILE="/tmp/feature-updates-cache.json"
 CACHE_DURATION=3600  # 1 hour in seconds
 DEVCONTAINER_JSON="/workspaces/shellinator/.devcontainer/devcontainer.json"
-GITHUB_DEVCONTAINER_URL="https://raw.githubusercontent.com/nikunh/shellinator/master/.devcontainer/devcontainer.json"
+
+# Auto-detect current branch from workspace (defaults to master if detection fails)
+WORKSPACE_DIR="/workspaces/shellinator"
+CURRENT_BRANCH=$(git -C "$WORKSPACE_DIR" branch --show-current 2>/dev/null || echo "master")
+GITHUB_DEVCONTAINER_URL="https://raw.githubusercontent.com/nikunh/shellinator/${CURRENT_BRANCH}/.devcontainer/devcontainer.json"
 GITHUB_DEVCONTAINER_CACHE="/tmp/github-devcontainer.json"
 
 # Colors for prompt display
