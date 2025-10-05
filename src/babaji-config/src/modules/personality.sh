@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 # Babaji Configuration Utility - Branch Personality Info Module
 # Shows current branch info, installed features, and available updates

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 # Feature Update Checker for Zsh Prompt
 # Checks for available updates to DevContainer features and displays in prompt
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 # SSH Service Management Module for Babaji Configuration Utility
 # Provides SSH service verification, start/restart, and configuration management

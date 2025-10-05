@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 # Babaji Configuration Utility - Persistent Files Module
 # Setup symlinks from NAS to home directory
@@ -61,19 +61,15 @@ run_persistent_files_setup() {
     style_subheader "▶️  Running Persistent Files Setup" "" "#4a90e2"
     echo ""
 
-    # Run the setup in a zsh subshell (persistent_files_setup is a zsh function)
-    zsh -c '
-        source ~/.zshrc
-        if type persistent_files_setup &>/dev/null; then
-            persistent_files_setup
-        else
-            echo "❌ persistent_files_setup function not found"
-            echo ""
-            echo "The function should be loaded from .persistent-files.zshrc"
-            echo "Try reloading your shell: exec zsh"
-            exit 1
-        fi
-    '
+    # Check if the function exists (now we're in zsh, so this works!)
+    if type persistent_files_setup &>/dev/null; then
+        persistent_files_setup
+    else
+        style_error "❌ persistent_files_setup function not found"
+        echo ""
+        echo "The function should be loaded from .persistent-files.zshrc"
+        echo "Try reloading your shell: exec zsh"
+    fi
 
     echo ""
     wait_for_user

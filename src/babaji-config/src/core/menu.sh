@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 # Babaji Configuration Utility - Core Menu System
 # Main menu and navigation logic

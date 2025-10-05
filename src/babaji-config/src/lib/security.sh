@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 # Babaji Configuration Utility - Runtime Security Monitor
 # Monitors and protects against tampering attempts

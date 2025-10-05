@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 # Babaji Configuration Utility - Verification Module
 # System verification and validation functions

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 # SSH Health Monitor Script
 # Monitors SSH service health and automatically restarts if needed

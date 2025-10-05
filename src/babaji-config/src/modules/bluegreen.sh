@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 # Babaji Configuration Utility - Blue-Green Deployment Module
 # Handles V2 build triggering, status monitoring, and switching

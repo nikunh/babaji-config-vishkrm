@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 # Post-Create Hook for Babaji Configuration Utility
 # Automatically starts SSH service and configures environment after container creation
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 # Version-Aware Hostname Management Module
 # Provides meaningful hostnames for DevContainers based on version and environment
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 # Babaji Configuration Utility - Heartbeat Management Module
 # Monitor and manage DevContainer heartbeat communication with manager
