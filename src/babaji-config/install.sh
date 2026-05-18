@@ -24,21 +24,28 @@ echo "Installing Babaji Configuration Utility (System Installation)..."
 SYSTEM_INSTALL_DIR="/usr/local/lib/babaji-config"
 SYSTEM_BIN_DIR="/usr/local/bin"
 
-# User directories (preserved for user tools)
-# Handle cases where HOME might not be set during build
-if [ -z "$HOME" ]; then
-    HOME="/home/babaji"
+# User directories (preserved for user tools).
+# Bug 2026-05-18: previously used $HOME, which at build time is /root (build
+# runs as root). That created /root/.local — invisible to the runtime user.
+# Resolve runtime user/home via standard chain (with root-fallback rejection).
+USERNAME="${USERNAME:-${_REMOTE_USER:-}}"
+if [ -z "$USERNAME" ] || [ "$USERNAME" = "root" ]; then
+    if getent passwd babaji >/dev/null 2>&1; then
+        USERNAME=babaji
+    else
+        USERNAME=$(getent passwd | awk -F: '$3>=1000 && $1!="nobody" {print $1; exit}')
+    fi
 fi
+USER_HOME="$(getent passwd "$USERNAME" 2>/dev/null | cut -d: -f6)"
+[ -z "$USER_HOME" ] && USER_HOME="/home/${USERNAME}"
+USER_GROUP="$(id -gn "$USERNAME" 2>/dev/null || echo users)"
 
-# Create user's local directory structure but don't install system tools there
-mkdir -p "$HOME/.local"
-mkdir -p "$HOME/.local/bin"
-mkdir -p "$HOME/.local/lib"
+# Create user's local directory structure under runtime user's HOME (not /root)
+mkdir -p "$USER_HOME/.local/bin"
+mkdir -p "$USER_HOME/.local/lib"
 
-# Ensure user's local directories are owned by babaji
-if [ "$USER" != "babaji" ] && [ -d "/home/babaji" ]; then
-    chown -R babaji:babaji /home/babaji/.local 2>/dev/null || true
-fi
+# Ensure user's local directories are owned by the runtime user
+chown -R "${USERNAME}:${USER_GROUP}" "$USER_HOME/.local" 2>/dev/null || true
 
 # Create system installation directories
 mkdir -p "$SYSTEM_INSTALL_DIR"
